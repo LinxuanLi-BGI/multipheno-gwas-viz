@@ -292,9 +292,9 @@ def main(args):
 
     output_path = args[2] # './output/'
 
-    missing_rate_threshold = float(args[2]) # 0.2
+    missing_rate_threshold = float(args[3]) # 0.2
 
-    correlation_method = args[3] # spearman
+    correlation_method = args[4] # spearman
 
     phenotype_matrix = pd.read_csv(phenotype_matrix_path, sep='\t')
 
