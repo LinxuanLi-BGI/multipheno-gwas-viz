@@ -1,0 +1,19 @@
+{
+    "Cardiovascular" : "#B33130",
+    "Endocrine/Metab" : "#19529E",
+    "Symptoms" : "#3D8F3D",
+    "Blood/Immune" : "#B36829",
+    "Respiratory" : "#70207F",
+    "Genitourinary" : "#1F7F7F",
+    "Sense organs" : "#7F6B21",
+    "Muscloskeletal" : "#522A8F",
+    "Neoplasms" : "#1F6F8F",
+    "Neurological" : "#8F3D49",
+    "Infections" : "#6B8F21",
+    "Gastrointestinal" : "#8F1F60",
+    "Mental" : "#2A8F62",
+    "Dermatological" : "#735F52",
+    "Genetic" : "#1E2E70",
+    "Pregnancy" : "#5E3929",
+    "Congenital" : "#4F4F4F"
+}   

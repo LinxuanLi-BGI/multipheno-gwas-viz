@@ -1,0 +1,15 @@
+{
+    "chrom" : "#CHROM",
+    "pos" : "POS",
+    "A1" : "A1",
+    "A2" : "OMITTED",
+    "freq" : "A1_FREQ",
+    "size" : "OBS_CT",
+    "beta" : "BETA",
+    "or" : "OR",
+    "se" : "SE",
+    "pvalue" : "P",
+    "log10p" : "NEG_LOG10_P",
+    "test" : "TEST",
+    "keep" : "ADD"
+}

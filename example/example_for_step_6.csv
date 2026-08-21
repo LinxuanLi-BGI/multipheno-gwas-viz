@@ -1,0 +1,301 @@
+phenotype	locusID	UID	category	chrom	top	top_snp_nearest_gene	candidate_novel
+Pheno1	0	Pheno1(0)	Cate1	1	44880907	Gene1	True
+Pheno1	1	Pheno1(1)	Cate1	1	76940759		False
+Pheno1	2	Pheno1(2)	Cate1	2	77525489	Gene2	True
+Pheno1	3	Pheno1(3)	Cate1	3	91254992	Gene3	False
+Pheno1	4	Pheno1(4)	Cate1	4	114227994	Gene4	False
+Pheno1	5	Pheno1(5)	Cate1	17	25166573		True
+Pheno1	6	Pheno1(6)	Cate1	5	110507758		False
+Pheno2	0	Pheno2(0)	Cate1	5	134404402	Gene5	False
+Pheno3	0	Pheno3(0)	Cate1	6	30803068	Gene6	False
+Pheno3	1	Pheno3(1)	Cate1	7	51043229	Gene7	False
+Pheno3	2	Pheno3(2)	Cate1	12	108160568		True
+Pheno3	3	Pheno3(3)	Cate1	12	30570782		False
+Pheno3	4	Pheno3(4)	Cate1	19	175905		False
+Pheno3	5	Pheno3(5)	Cate1	1	211347607		False
+Pheno3	6	Pheno3(6)	Cate1	8	66772204	Gene8	False
+Pheno3	7	Pheno3(7)	Cate1	7	133580341		False
+Pheno3	8	Pheno3(8)	Cate1	15	80664751		False
+Pheno3	9	Pheno3(9)	Cate1	9	83115878	Gene9	False
+Pheno3	10	Pheno3(10)	Cate1	10	99090737	Gene10	False
+Pheno3	11	Pheno3(11)	Cate1	11	24365622	Gene11	False
+Pheno4	0	Pheno4(0)	Cate1	4	51991292		False
+Pheno4	1	Pheno4(1)	Cate1	2	118151394		False
+Pheno4	2	Pheno4(2)	Cate1	12	42726048	Gene12	False
+Pheno4	3	Pheno4(3)	Cate1	17	69077702		False
+Pheno4	4	Pheno4(4)	Cate1	13	52642314	Gene13	False
+Pheno4	5	Pheno4(5)	Cate1	8	112782378		False
+Pheno4	6	Pheno4(6)	Cate1	4	69274413		False
+Pheno4	7	Pheno4(7)	Cate1	7	57275120		False
+Pheno4	8	Pheno4(8)	Cate1	14	64304457	Gene14	True
+Pheno4	9	Pheno4(9)	Cate1	15	75537994	Gene15	False
+Pheno4	10	Pheno4(10)	Cate1	17	76852665		False
+Pheno4	11	Pheno4(11)	Cate1	14	46411879		False
+Pheno4	12	Pheno4(12)	Cate1	16	16263216	Gene16	False
+Pheno4	13	Pheno4(13)	Cate1	17	26738864	Gene17	False
+Pheno4	14	Pheno4(14)	Cate1	18	37018100	Gene18	True
+Pheno4	15	Pheno4(15)	Cate1	19	35173359	Gene19	False
+Pheno4	16	Pheno4(16)	Cate1	20	47694596	Gene20	True
+Pheno4	17	Pheno4(17)	Cate1	16	16294234	Gene16	True
+Pheno4	18	Pheno4(18)	Cate1	1	44967177		False
+Pheno4	19	Pheno4(19)	Cate1	11	70496696		True
+Pheno4	20	Pheno4(20)	Cate1	5	134388301	Gene5	False
+Pheno4	21	Pheno4(21)	Cate1	13	100766108		False
+Pheno4	22	Pheno4(22)	Cate1	6	30787395	Gene6	False
+Pheno4	23	Pheno4(23)	Cate1	14	64292044	Gene14	False
+Pheno4	24	Pheno4(24)	Cate1	3	116172451		True
+Pheno5	0	Pheno5(0)	Cate1	10	38544641		False
+Pheno5	1	Pheno5(1)	Cate1	2	77590245	Gene2	True
+Pheno6	0	Pheno6(0)	Cate1	7	27070163		False
+Pheno7	0	Pheno7(0)	Cate1	4	114161712	Gene4	False
+Pheno7	1	Pheno7(1)	Cate1	12	3872258		False
+Pheno8	0	Pheno8(0)	Cate1	9	83048487	Gene9	True
+Pheno8	1	Pheno8(1)	Cate1	4	20335691		True
+Pheno8	2	Pheno8(2)	Cate1	13	52686859	Gene13	False
+Pheno8	3	Pheno8(3)	Cate1	15	75492274	Gene15	False
+Pheno8	4	Pheno8(4)	Cate1	6	30806555	Gene6	False
+Pheno8	5	Pheno8(5)	Cate1	20	17605757		False
+Pheno8	6	Pheno8(6)	Cate1	18	36982705	Gene18	False
+Pheno8	7	Pheno8(7)	Cate1	14	64240095	Gene14	False
+Pheno8	8	Pheno8(8)	Cate1	8	124973794		True
+Pheno8	9	Pheno8(9)	Cate1	11	105949236		False
+Pheno8	10	Pheno8(10)	Cate1	22	20299820		False
+Pheno8	11	Pheno8(11)	Cate1	1	26935755		False
+Pheno8	12	Pheno8(12)	Cate1	2	77557846	Gene2	False
+Pheno8	13	Pheno8(13)	Cate1	10	4072740		False
+Pheno8	14	Pheno8(14)	Cate1	1	173639467		False
+Pheno8	15	Pheno8(15)	Cate1	8	66829588	Gene8	True
+Pheno8	16	Pheno8(16)	Cate1	2	77559366	Gene2	False
+Pheno8	17	Pheno8(17)	Cate1	4	131186628		False
+Pheno9	0	Pheno9(0)	Cate1	7	57052000		False
+Pheno9	1	Pheno9(1)	Cate1	10	59596322		True
+Pheno9	2	Pheno9(2)	Cate1	6	30838251	Gene6	False
+Pheno9	3	Pheno9(3)	Cate1	10	99059102	Gene10	False
+Pheno9	4	Pheno9(4)	Cate1	20	47708712	Gene20	True
+Pheno9	5	Pheno9(5)	Cate1	19	35183655	Gene19	False
+Pheno9	6	Pheno9(6)	Cate1	2	77551951	Gene2	False
+Pheno10	0	Pheno10(0)	Cate1	6	155554223		False
+Pheno10	1	Pheno10(1)	Cate1	6	30781335	Gene6	True
+Pheno10	2	Pheno10(2)	Cate1	14	64315964	Gene14	True
+Pheno11	0	Pheno11(0)	Cate1	19	35256103	Gene19	False
+Pheno11	1	Pheno11(1)	Cate1	10	72964386		False
+Pheno11	2	Pheno11(2)	Cate1	18	30509930		False
+Pheno11	3	Pheno11(3)	Cate1	2	77550725	Gene2	False
+Pheno11	4	Pheno11(4)	Cate1	3	91285984	Gene3	False
+Pheno11	5	Pheno11(5)	Cate1	7	2872718		False
+Pheno11	6	Pheno11(6)	Cate1	15	75539047	Gene15	False
+Pheno11	7	Pheno11(7)	Cate1	3	24252556		False
+Pheno11	8	Pheno11(8)	Cate1	3	90923975		False
+Pheno11	9	Pheno11(9)	Cate1	13	52623619	Gene13	False
+Pheno11	10	Pheno11(10)	Cate1	4	107209438		False
+Pheno11	11	Pheno11(11)	Cate1	10	99010628	Gene10	False
+Pheno11	12	Pheno11(12)	Cate1	8	26623933		False
+Pheno11	13	Pheno11(13)	Cate1	9	37014282		False
+Pheno12	0	Pheno12(0)	Cate1	8	66807723	Gene8	False
+Pheno12	1	Pheno12(1)	Cate1	13	52703465	Gene13	True
+Pheno13	0	Pheno13(0)	Cate1	5	9060452		False
+Pheno13	1	Pheno13(1)	Cate1	5	134417160	Gene5	True
+Pheno13	2	Pheno13(2)	Cate1	2	237318509		True
+Pheno14	0	Pheno14(0)	Cate1	5	148904625		False
+Pheno14	1	Pheno14(1)	Cate1	2	77561297	Gene2	False
+Pheno14	2	Pheno14(2)	Cate1	14	84458529		False
+Pheno14	3	Pheno14(3)	Cate1	12	64536143		False
+Pheno14	4	Pheno14(4)	Cate1	11	133944404		True
+Pheno14	5	Pheno14(5)	Cate1	3	110638133		False
+Pheno14	6	Pheno14(6)	Cate1	6	147011911		False
+Pheno14	7	Pheno14(7)	Cate1	12	42671733	Gene12	False
+Pheno14	8	Pheno14(8)	Cate1	9	83079824	Gene9	False
+Pheno14	9	Pheno14(9)	Cate1	13	62960779		False
+Pheno14	10	Pheno14(10)	Cate1	7	51032452	Gene7	False
+Pheno14	11	Pheno14(11)	Cate1	17	26649670	Gene17	False
+Pheno14	12	Pheno14(12)	Cate1	2	98138732		False
+Pheno14	13	Pheno14(13)	Cate1	2	185015224		False
+Pheno14	14	Pheno14(14)	Cate1	10	24693383		True
+Pheno14	15	Pheno14(15)	Cate1	14	64301097	Gene14	False
+Pheno14	16	Pheno14(16)	Cate1	17	25206567		False
+Pheno14	17	Pheno14(17)	Cate1	8	44715515		False
+Pheno14	18	Pheno14(18)	Cate1	19	44546075		False
+Pheno14	19	Pheno14(19)	Cate1	16	29150457		False
+Pheno14	20	Pheno14(20)	Cate1	2	159277018		False
+Pheno14	21	Pheno14(21)	Cate1	2	77518719	Gene2	False
+Pheno14	22	Pheno14(22)	Cate1	2	77548380	Gene2	False
+Pheno14	23	Pheno14(23)	Cate1	4	136824969		False
+Pheno14	24	Pheno14(24)	Cate1	18	37029093	Gene18	False
+Pheno14	25	Pheno14(25)	Cate1	4	67227461		False
+Pheno14	26	Pheno14(26)	Cate1	7	51065492	Gene7	False
+Pheno14	27	Pheno14(27)	Cate1	2	77593834	Gene2	False
+Pheno14	28	Pheno14(28)	Cate1	4	127710796		False
+Pheno14	29	Pheno14(29)	Cate1	1	182272916		False
+Pheno15	0	Pheno15(0)	Cate2	18	36972843	Gene18	False
+Pheno15	1	Pheno15(1)	Cate2	11	25465591		False
+Pheno15	2	Pheno15(2)	Cate2	14	59663376		True
+Pheno15	3	Pheno15(3)	Cate2	4	114135502	Gene4	True
+Pheno15	4	Pheno15(4)	Cate2	2	77568466	Gene2	False
+Pheno15	5	Pheno15(5)	Cate2	1	44852701	Gene1	True
+Pheno15	6	Pheno15(6)	Cate2	16	16318885	Gene16	True
+Pheno16	0	Pheno16(0)	Cate2	13	52696749	Gene13	False
+Pheno16	1	Pheno16(1)	Cate2	8	66778323	Gene8	True
+Pheno17	0	Pheno17(0)	Cate2	12	42718083	Gene12	False
+Pheno17	1	Pheno17(1)	Cate2	5	134425890	Gene5	False
+Pheno18	0	Pheno18(0)	Cate2	14	56349217		False
+Pheno18	1	Pheno18(1)	Cate2	8	66809650	Gene8	False
+Pheno18	2	Pheno18(2)	Cate2	6	30816310	Gene6	False
+Pheno19	0	Pheno19(0)	Cate2	19	35191544	Gene19	False
+Pheno19	1	Pheno19(1)	Cate2	11	3252810		False
+Pheno19	2	Pheno19(2)	Cate2	8	66791552	Gene8	False
+Pheno20	0	Pheno20(0)	Cate2	20	47721923	Gene20	False
+Pheno20	1	Pheno20(1)	Cate2	21	19193671		True
+Pheno20	2	Pheno20(2)	Cate2	2	173603934		False
+Pheno21	0	Pheno21(0)	Cate2	16	56861957		False
+Pheno21	1	Pheno21(1)	Cate2	2	119215342		False
+Pheno22	0	Pheno22(0)	Cate2	16	16305697	Gene16	False
+Pheno22	1	Pheno22(1)	Cate2	6	30800745	Gene6	False
+Pheno22	2	Pheno22(2)	Cate2	13	14190038		False
+Pheno23	0	Pheno23(0)	Cate2	14	36864223		False
+Pheno23	1	Pheno23(1)	Cate2	4	74146811		False
+Pheno23	2	Pheno23(2)	Cate2	8	66815145	Gene8	False
+Pheno23	3	Pheno23(3)	Cate2	7	51044867	Gene7	False
+Pheno23	4	Pheno23(4)	Cate2	1	44907319	Gene1	True
+Pheno23	5	Pheno23(5)	Cate2	8	66765594	Gene8	True
+Pheno23	6	Pheno23(6)	Cate2	19	17906891		False
+Pheno24	0	Pheno24(0)	Cate2	12	46939596		False
+Pheno24	1	Pheno24(1)	Cate2	18	36997181	Gene18	False
+Pheno24	2	Pheno24(2)	Cate2	14	8658185		False
+Pheno25	0	Pheno25(0)	Cate2	20	43806992		False
+Pheno25	1	Pheno25(1)	Cate2	8	2129689		False
+Pheno25	2	Pheno25(2)	Cate2	5	134412015	Gene5	False
+Pheno25	3	Pheno25(3)	Cate2	11	24393525	Gene11	False
+Pheno25	4	Pheno25(4)	Cate2	7	51010370	Gene7	True
+Pheno25	5	Pheno25(5)	Cate2	5	134364625	Gene5	False
+Pheno25	6	Pheno25(6)	Cate2	4	32816663		True
+Pheno25	7	Pheno25(7)	Cate2	12	40996209		False
+Pheno25	8	Pheno25(8)	Cate2	17	39007668		False
+Pheno25	9	Pheno25(9)	Cate2	18	37044794	Gene18	False
+Pheno25	10	Pheno25(10)	Cate2	18	18495587		False
+Pheno25	11	Pheno25(11)	Cate2	3	126302975		False
+Pheno25	12	Pheno25(12)	Cate2	15	41855805		False
+Pheno25	13	Pheno25(13)	Cate2	14	30124482		False
+Pheno25	14	Pheno25(14)	Cate2	3	60985145		False
+Pheno25	15	Pheno25(15)	Cate2	2	77586943	Gene2	False
+Pheno26	0	Pheno26(0)	Cate3	16	27707453		False
+Pheno27	0	Pheno27(0)	Cate3	14	64268473	Gene14	False
+Pheno27	1	Pheno27(1)	Cate3	7	24283326		False
+Pheno27	2	Pheno27(2)	Cate3	14	64241615	Gene14	False
+Pheno28	0	Pheno28(0)	Cate3	8	2895701		False
+Pheno28	1	Pheno28(1)	Cate3	15	75487198	Gene15	True
+Pheno28	2	Pheno28(2)	Cate3	22	44481360		False
+Pheno28	3	Pheno28(3)	Cate3	4	94250360		True
+Pheno28	4	Pheno28(4)	Cate3	13	52646469	Gene13	False
+Pheno28	5	Pheno28(5)	Cate3	6	30777495	Gene6	False
+Pheno28	6	Pheno28(6)	Cate3	18	37030381	Gene18	False
+Pheno28	7	Pheno28(7)	Cate3	12	42671613	Gene12	True
+Pheno28	8	Pheno28(8)	Cate3	1	11446986		True
+Pheno28	9	Pheno28(9)	Cate3	11	28823179		True
+Pheno29	0	Pheno29(0)	Cate3	15	75528821	Gene15	False
+Pheno29	1	Pheno29(1)	Cate3	1	85563660		False
+Pheno29	2	Pheno29(2)	Cate3	10	28751910		False
+Pheno29	3	Pheno29(3)	Cate3	7	14537055		False
+Pheno29	4	Pheno29(4)	Cate3	19	54413573		True
+Pheno29	5	Pheno29(5)	Cate3	14	50574541		False
+Pheno29	6	Pheno29(6)	Cate3	1	168481051		False
+Pheno29	7	Pheno29(7)	Cate3	16	50204597		False
+Pheno29	8	Pheno29(8)	Cate3	15	75492082	Gene15	False
+Pheno29	9	Pheno29(9)	Cate3	7	96319893		False
+Pheno29	10	Pheno29(10)	Cate3	7	51028454	Gene7	False
+Pheno30	0	Pheno30(0)	Cate3	9	83049416	Gene9	False
+Pheno30	1	Pheno30(1)	Cate3	12	73912203		False
+Pheno31	0	Pheno31(0)	Cate3	2	77515968	Gene2	False
+Pheno32	0	Pheno32(0)	Cate3	10	99035135	Gene10	False
+Pheno32	1	Pheno32(1)	Cate3	3	91290975	Gene3	False
+Pheno32	2	Pheno32(2)	Cate3	13	112317841		True
+Pheno32	3	Pheno32(3)	Cate3	5	67326728		False
+Pheno32	4	Pheno32(4)	Cate3	8	66858922	Gene8	True
+Pheno32	5	Pheno32(5)	Cate3	9	83076098	Gene9	False
+Pheno32	6	Pheno32(6)	Cate3	14	64247908	Gene14	False
+Pheno33	0	Pheno33(0)	Cate3	10	99085118	Gene10	False
+Pheno34	0	Pheno34(0)	Cate3	2	77519907	Gene2	False
+Pheno34	1	Pheno34(1)	Cate3	19	35216902	Gene19	False
+Pheno34	2	Pheno34(2)	Cate3	17	74379035		False
+Pheno35	0	Pheno35(0)	Cate4	11	11257934		True
+Pheno35	1	Pheno35(1)	Cate4	1	44820982	Gene1	False
+Pheno36	0	Pheno36(0)	Cate4	12	77316310		True
+Pheno37	0	Pheno37(0)	Cate4	20	1152408		False
+Pheno37	1	Pheno37(1)	Cate4	21	31558972		False
+Pheno37	2	Pheno37(2)	Cate4	3	148147868		False
+Pheno37	3	Pheno37(3)	Cate4	5	134435204	Gene5	False
+Pheno37	4	Pheno37(4)	Cate4	16	31670321		True
+Pheno37	5	Pheno37(5)	Cate4	2	77570438	Gene2	False
+Pheno37	6	Pheno37(6)	Cate4	16	16307217	Gene16	False
+Pheno38	0	Pheno38(0)	Cate4	6	12279996		False
+Pheno39	0	Pheno39(0)	Cate4	8	91980768		True
+Pheno39	1	Pheno39(1)	Cate4	16	76086741		False
+Pheno40	0	Pheno40(0)	Cate4	10	59173968		False
+Pheno40	1	Pheno40(1)	Cate4	13	44746575		True
+Pheno40	2	Pheno40(2)	Cate4	19	35208100	Gene19	False
+Pheno40	3	Pheno40(3)	Cate4	17	26718475	Gene17	False
+Pheno40	4	Pheno40(4)	Cate4	6	30840273	Gene6	False
+Pheno40	5	Pheno40(5)	Cate4	16	11300616		True
+Pheno40	6	Pheno40(6)	Cate4	12	97635576		False
+Pheno41	0	Pheno41(0)	Cate4	1	247175119		False
+Pheno41	1	Pheno41(1)	Cate4	20	37675565		False
+Pheno41	2	Pheno41(2)	Cate4	13	52695620	Gene13	False
+Pheno41	3	Pheno41(3)	Cate4	12	42651830	Gene12	False
+Pheno41	4	Pheno41(4)	Cate4	15	21921378		False
+Pheno41	5	Pheno41(5)	Cate4	7	31087200		False
+Pheno41	6	Pheno41(6)	Cate4	18	158533		False
+Pheno41	7	Pheno41(7)	Cate4	12	80099587		False
+Pheno41	8	Pheno41(8)	Cate4	8	66833739	Gene8	False
+Pheno41	9	Pheno41(9)	Cate4	10	99013299	Gene10	False
+Pheno41	10	Pheno41(10)	Cate4	1	41095384		False
+Pheno41	11	Pheno41(11)	Cate4	1	44886293	Gene1	True
+Pheno41	12	Pheno41(12)	Cate4	15	44290341		False
+Pheno42	0	Pheno42(0)	Cate5	4	126570366		False
+Pheno42	1	Pheno42(1)	Cate5	16	16355095	Gene16	False
+Pheno42	2	Pheno42(2)	Cate5	15	75503434	Gene15	False
+Pheno42	3	Pheno42(3)	Cate5	5	134352630	Gene5	False
+Pheno42	4	Pheno42(4)	Cate5	7	56718032		False
+Pheno42	5	Pheno42(5)	Cate5	4	22341256		False
+Pheno42	6	Pheno42(6)	Cate5	16	16331307	Gene16	False
+Pheno43	0	Pheno43(0)	Cate5	10	99057802	Gene10	True
+Pheno43	1	Pheno43(1)	Cate5	17	26678314	Gene17	False
+Pheno44	0	Pheno44(0)	Cate5	10	99062100	Gene10	False
+Pheno44	1	Pheno44(1)	Cate5	2	187750065		False
+Pheno44	2	Pheno44(2)	Cate5	21	6612965		True
+Pheno44	3	Pheno44(3)	Cate5	5	154031778		False
+Pheno44	4	Pheno44(4)	Cate5	9	20042444		False
+Pheno44	5	Pheno44(5)	Cate5	6	30749660	Gene6	False
+Pheno44	6	Pheno44(6)	Cate5	20	47787231	Gene20	False
+Pheno44	7	Pheno44(7)	Cate5	4	114175275	Gene4	True
+Pheno44	8	Pheno44(8)	Cate5	14	64269702	Gene14	False
+Pheno44	9	Pheno44(9)	Cate5	15	75571176	Gene15	False
+Pheno44	10	Pheno44(10)	Cate5	14	98459804		False
+Pheno44	11	Pheno44(11)	Cate5	19	35222738	Gene19	False
+Pheno44	12	Pheno44(12)	Cate5	9	83123538	Gene9	False
+Pheno44	13	Pheno44(13)	Cate5	6	23347650		True
+Pheno44	14	Pheno44(14)	Cate5	6	30827918	Gene6	False
+Pheno44	15	Pheno44(15)	Cate5	9	83084889	Gene9	False
+Pheno44	16	Pheno44(16)	Cate5	15	75538915	Gene15	False
+Pheno44	17	Pheno44(17)	Cate5	5	134414269	Gene5	False
+Pheno44	18	Pheno44(18)	Cate5	10	66219792		False
+Pheno44	19	Pheno44(19)	Cate5	1	44839446	Gene1	False
+Pheno44	20	Pheno44(20)	Cate5	8	66796135	Gene8	False
+Pheno45	0	Pheno45(0)	Cate5	13	52674553	Gene13	True
+Pheno46	0	Pheno46(0)	Cate5	10	44257776		True
+Pheno46	1	Pheno46(1)	Cate5	14	69388428		False
+Pheno46	2	Pheno46(2)	Cate5	13	52638968	Gene13	False
+Pheno46	3	Pheno46(3)	Cate5	12	42668261	Gene12	True
+Pheno46	4	Pheno46(4)	Cate5	16	16288718	Gene16	False
+Pheno46	5	Pheno46(5)	Cate5	9	49614874		False
+Pheno46	6	Pheno46(6)	Cate5	11	126289659		False
+Pheno47	0	Pheno47(0)	Cate6	8	66841000	Gene8	False
+Pheno47	1	Pheno47(1)	Cate6	8	66777584	Gene8	True
+Pheno47	2	Pheno47(2)	Cate6	11	24355734	Gene11	False
+Pheno48	0	Pheno48(0)	Cate6	8	55597702		False
+Pheno49	0	Pheno49(0)	Cate6	5	106236255		False
+Pheno50	0	Pheno50(0)	Cate6	10	80554874		False
+Pheno50	1	Pheno50(1)	Cate6	8	138900480		False
+Pheno50	2	Pheno50(2)	Cate6	13	16846556		True
+Pheno50	3	Pheno50(3)	Cate6	15	17467620		False
+Pheno50	4	Pheno50(4)	Cate6	18	37055997	Gene18	True
+Pheno50	5	Pheno50(5)	Cate6	12	71792708		True
+Pheno50	6	Pheno50(6)	Cate6	20	47733503	Gene20	False

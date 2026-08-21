@@ -1,0 +1,2 @@
+phenotype_name	phenotype_category	summary_statistics_path
+P_LCR	Default	./example/GWAS_quantitative_20.P_LCR.glm.linear.add.gz
