@@ -37,6 +37,7 @@ external/   Reference data
 input/      User-prepared input data (create as needed)
 output/     Generated results (create before running)
 step*.py    Pipeline scripts
+tools/      Standalone utility scripts
 ```
 
 ## Usage
