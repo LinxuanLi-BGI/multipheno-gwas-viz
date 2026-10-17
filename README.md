@@ -9,7 +9,7 @@ A Python pipeline for identifying significant GWAS variants, annotating genes an
 - `numpy`
 - `scipy`
 - `matplotlib`
-- `awk` (used by step 2)
+- `awk`, `cat`, and `zcat` (used by step 2 in a Unix-like shell)
 
 Install Python dependencies with:
 
@@ -32,21 +32,21 @@ Run the steps in order:
 ## Project Structure
 
 ```text
-config/     Configuration files
+example/    Example inputs and JSON configuration files
 external/   Reference data
-input/      Input data
-output/     Generated results
+input/      User-prepared input data (create as needed)
+output/     Generated results (create before running)
 step*.py    Pipeline scripts
 ```
 
 ## Usage
 
 ```bash
-python step1.calculate_independ_phenotype_count.py <phenotype_matrix> <output_dir> <missing_rate> <correlation_method>
-python step2.extract_significanct_snp.py <manifest> <output_dir> <summary_config> <pvalue_threshold> <workers>
+python step1.calculate_independent_phenotype_count.py <phenotype_matrix> <output_dir> <missing_rate> <correlation_method>
+python step2.extract_significant_snp.py <manifest> <output_dir> <summary_config> <pvalue_threshold> <workers>
 python step3.mark_gene.py <input_file> <known_gene_file> <output_dir>
 python step4.snp2locus.py <input_file> <known_gene_file> <locus_window> <output_dir>
 python step5.mark_known_GWAS_catalog.py <locus_file> <trait_mapping> <gwas_catalog> <replication_window> <output_dir>
-python step6.draw_circos_plot.py <locus_file> <color_config> <output_dir> <format> <candidate_novel>
+python step6.draw_circos_plot.py <locus_file> <color_config> <output_dir> <format> [highlight_column]
 python step7.mark_GWAS_catalog_background.py <locus_file> <gwas_catalog> <replication_window> <output_dir>
 ```

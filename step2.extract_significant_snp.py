@@ -27,7 +27,7 @@ builtin_summary_config = {
         "test" : "TEST",
         "keep" : "ADD"
     },
-    'PLINK2_logistics':{
+    'PLINK2_logistic':{
         "chrom" : "#CHROM",
         "pos" : "POS",
         "A1" : "A1",
@@ -100,6 +100,9 @@ def execute_command(command):
         }
 
 def load_config(input_str: str) -> dict:
+    # Accept the historical misspelling for existing command lines.
+    if input_str == 'PLINK2_logistics':
+        input_str = 'PLINK2_logistic'
     # check if input matches builtin config keys
     if input_str in builtin_summary_config:
         return builtin_summary_config[input_str]
@@ -122,7 +125,7 @@ def load_config(input_str: str) -> dict:
 
     raise ValueError(
         f"Unsupported input: {input_str}. "
-        "Must be PLINK2/Regenie builtin key, .json path or .csv path."
+        "Must be a PLINK2/PLINK2_logistic/Regenie built-in key, .json path or .csv path."
     )
 
 # format chrom
@@ -159,7 +162,7 @@ def main(args):
 
     output_path = args[2] # ./output/
 
-    summary_config_key = args[3] # PLINK
+    summary_config_key = args[3] # PLINK2
 
     significance_threshold = float(args[4]) # 1e-10
 
@@ -266,7 +269,7 @@ def main(args):
             if source_name in sig_df.columns:
                 formatted[output_name] = sig_df[source_name]
 
-        # Keep only beta; fill missing beta values from OR using exp(OR).
+        # Keep beta when available; otherwise derive beta from OR using ln(OR).
         beta_name = summary_config.get('beta') or ''
         or_name = summary_config.get('or') or ''
         if beta_name in sig_df.columns:
@@ -279,7 +282,7 @@ def main(args):
             beta = pd.Series(np.nan, index=sig_df.index)
         formatted['beta'] = beta
 
-        # Handle the pvalue or log10(pvalue) col
+        # Handle the p-value or -log10(p-value) column.
         p_name = summary_config.get('pvalue') or ''
         log_name = summary_config.get('log10p') or ''
 

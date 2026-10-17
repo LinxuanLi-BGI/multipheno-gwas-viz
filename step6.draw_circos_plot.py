@@ -12,7 +12,7 @@ from matplotlib.colors import to_hex
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-bulitin_palettes = {
+builtin_palettes = {
     'Accent': 8 ,
     'Dark2' : 8 , 
     'Set1'  : 9 , 
@@ -58,7 +58,7 @@ Chr_len = {
 
 def load_config(input_str: str) -> dict:
     # check if input matches builtin config keys
-    if input_str in bulitin_palettes:
+    if input_str in builtin_palettes:
         return {}
 
     path_obj = Path(input_str)
@@ -79,7 +79,7 @@ def load_config(input_str: str) -> dict:
 
     raise ValueError(
         f"Unsupported input: {input_str}. "
-        "Must be Palettes builtin key, .json path or .csv path."
+        "Must be a built-in palette key, .json path or .csv path."
     )
 
 def rotate_text(x_loc):
@@ -142,7 +142,7 @@ def main(args):
     phenotype_summary['N_SNP'] = all_locus_summary.groupby("phenotype")['UID'].count()
     phenotype_summary['N_locus'] = all_locus_summary.groupby("phenotype")['UID'].nunique()
     if highlight_marker != 'NA':
-        phenotype_summary['N_hight'] = all_locus_summary.groupby("phenotype")[highlight_marker].sum()
+        phenotype_summary['N_highlight'] = all_locus_summary.groupby("phenotype")[highlight_marker].sum()
 
     ############################################################
     # 3. Category-level summary
@@ -162,11 +162,11 @@ def main(args):
     category_summary['bottom'] = category_summary['N_pheno'].cumsum()-category_summary['N_pheno']
 
     # palette_path
-    if palette_path in bulitin_palettes.keys():
-        if len(category_summary) > bulitin_palettes[palette_path]:
+    if palette_path in builtin_palettes.keys():
+        if len(category_summary) > builtin_palettes[palette_path]:
             print(
                 f"Palette {palette_path} supports at most "
-                f"{bulitin_palettes[palette_path]} categories."
+                f"{builtin_palettes[palette_path]} categories."
             )
             category_summary['color'] = '#888888'
         else:
@@ -221,13 +221,13 @@ def main(args):
     # remove 
     all_locus_summary['locus_top_gene'] = all_locus_summary['top_snp_nearest_gene'].map(strip_arrow)
     # gene-N repeat
-    repete_gene = all_locus_summary['locus_top_gene'].value_counts().to_frame()
+    repeated_genes = all_locus_summary['locus_top_gene'].value_counts().to_frame()
     # gene-pos
-    repete_gene['theta'] = all_locus_summary.dropna(subset='locus_top_gene').groupby('locus_top_gene')['theta'].mean()
+    repeated_genes['theta'] = all_locus_summary.dropna(subset='locus_top_gene').groupby('locus_top_gene')['theta'].mean()
     # keep the top N_gene_mark
-    repete_gene = repete_gene.iloc[:N_gene_mark].copy()
+    repeated_genes = repeated_genes.iloc[:N_gene_mark].copy()
     # sort by theta
-    repete_gene = repete_gene.sort_values('theta')
+    repeated_genes = repeated_genes.sort_values('theta')
 
     # Circumferential histogram statistics
     sections = np.linspace(0,Dim,101)
@@ -307,7 +307,7 @@ def main(args):
             break
     yzoom = -yend/4/bin_ymax
     ticks = np.arange(0, bin_ymax, i).astype(int)
-    # grid of histgram
+    # Histogram grid.
     for d,i in enumerate(ticks):
         if i == 0:
             ax.plot(np.linspace(0,Dim,360),i*yzoom*np.ones(360), lw=3, color='w', zorder=4)
@@ -388,7 +388,7 @@ def main(args):
 
     word_wide = 0.0138 * yend
     last_theta = -1
-    for key,values in repete_gene.iterrows():
+    for key,values in repeated_genes.iterrows():
         # theta project distance 0.02
         if values.theta - last_theta > 0.02:
             this_theta = values.theta
@@ -443,7 +443,7 @@ def main(args):
         ax_c.barh(
             y=phenotype_summary['y'],
             height=1,
-            width=phenotype_summary['N_hight'],
+            width=phenotype_summary['N_highlight'],
             left=0,
             alpha=1,
             color=phenotype_summary['category'].map(category_summary['color'])
