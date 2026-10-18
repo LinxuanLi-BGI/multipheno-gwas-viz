@@ -3,6 +3,7 @@
 
 import os
 import sys
+import csv
 import pandas as pd
 import numpy as np
 
@@ -48,6 +49,45 @@ def format_trait_count(series: pd.Series) -> str:
     parts = series.index + "[" + series.astype(str) + "]"
     return ", ".join(parts.tolist())
 
+
+def load_trait_mapping(path, catalog_traits, delimiter='; '):
+    """Validate the TSV structure and check labels against the full Catalog."""
+    def warn(message):
+        print(f'Warning: trait_2_catalog {path!r}: {message}', file=sys.stderr)
+
+    try:
+        with open(path, encoding='utf-8-sig', newline='') as handle:
+            rows = [row for row in csv.reader(handle, delimiter='\t', strict=True) if row]
+        if (not delimiter or len(rows) < 2
+                or not {'phenotype', 'catalog_labels'}.issubset(rows[0])
+                or len(set(rows[0])) != len(rows[0])):
+            raise ValueError
+        header = rows[0]
+        mapping = {}
+        for row in rows[1:]:
+            if len(row) != len(header):
+                raise ValueError
+            record = dict(zip(header, row))
+            phenotype = record['phenotype']
+            if not phenotype.strip() or phenotype in mapping:
+                raise ValueError
+            mapping[phenotype] = record['catalog_labels'].split(delimiter)
+    except (csv.Error, UnicodeError, ValueError):
+        warn("invalid mapping format. Use a UTF-8 tab-separated file with 'phenotype' "
+             "and 'catalog_labels' columns, one row per phenotype, and a nonempty "
+             'label delimiter. Step 5 cannot continue.')
+        return None
+
+    for phenotype, labels in mapping.items():
+        missing = [label for label in labels if label not in catalog_traits]
+        if missing:
+            warn(f'phenotype={phenotype!r}: labels not found in GWAS Catalog '
+                 f'DISEASE/TRAIT: {missing!r}. Check label names and the delimiter '
+                 f'(currently {delimiter!r}; configurable via the optional final argument). '
+                 'Unmatched labels will not contribute to replication counts.')
+    return mapping
+
+
 def main(args):
     ############################################################
     # 1. Load input
@@ -62,12 +102,20 @@ def main(args):
 
     output_path = args[5] # ./output/
 
+    # Separator within catalog_labels; mapping-file columns always use tabs.
+    catalog_label_delimiter = args[6] if len(args) > 6 else '; '
+
     all_locus_summary = pd.read_csv(all_locus_path, sep='\t') # phenotype chrom start end locusID UID
 
-    # phenotype catalog_labels ...
-    trait_2_catalog:pd.Series = pd.read_csv(trait_2_catalog_path, sep='\t', index_col='phenotype')['catalog_labels'] 
-
     gwas_catalog = pd.read_csv(gwas_catalog_path, sep='\t', low_memory=False) # P-VALUE CHR_ID CHR_POS DISEASE/TRAIT
+
+    trait_2_catalog = load_trait_mapping(
+        trait_2_catalog_path,
+        set(gwas_catalog['DISEASE/TRAIT'].dropna()),
+        catalog_label_delimiter,
+    )
+    if trait_2_catalog is None:
+        return 1
 
     # GWAS catalog also contain variants that did not reach the threshold 5e-8
     GWAS_catalog_replication_threshold = 5e-8
@@ -92,11 +140,15 @@ def main(args):
     ############################################################
 
     # focus on the traits provided in trait_2_catalog table
-    all_traits = trait_2_catalog.index.values
+    all_traits = trait_2_catalog.keys()
+
+    # Evidence from the most significant matching Catalog association.
+    all_locus_summary['rep_trait'] = ''
+    all_locus_summary['rep_variant'] = ''
 
     for trait in all_traits:
         # DISEASE/TRAIT label for this phenotype
-        this = trait_2_catalog[trait].split('; ')
+        this = trait_2_catalog[trait]
         # locus for this phenotype
         this_locus = all_locus_summary.query('phenotype == @trait')
         # reported gwas finding in this phenotype
@@ -115,6 +167,12 @@ def main(args):
             all_locus_summary.loc[i, 'rep_EUR'] = len(catalog_in_window.query('is_EUR')['PUBMEDID'].unique())
             all_locus_summary.loc[i, 'rep_study'] = ', '.join(catalog_in_window['PUBMEDID'].unique().astype(str))
 
+            if not catalog_in_window.empty:
+                # idxmin retains the first Catalog row when P-values are tied.
+                top_match = catalog_in_window.loc[catalog_in_window['P-VALUE'].idxmin()]
+                all_locus_summary.loc[i, 'rep_trait'] = top_match['DISEASE/TRAIT']
+                all_locus_summary.loc[i, 'rep_variant'] = top_match['SNPS']
+
     ############################################################
     # 3. candidate_novel and save
     ############################################################
@@ -125,4 +183,4 @@ def main(args):
     all_locus_summary.to_csv(os.path.join(output_path, 'step5.all_locus_cata.csv'), sep='\t', index=False)
 
 if __name__ == "__main__":
-    main(sys.argv)
+    sys.exit(main(sys.argv))
