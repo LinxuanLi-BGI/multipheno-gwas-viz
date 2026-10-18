@@ -4,18 +4,28 @@ A Python pipeline for identifying significant GWAS variants, annotating genes an
 
 ## Requirements
 
-- Python 3
-- `pandas`
-- `numpy`
-- `scipy`
-- `matplotlib`
-- `awk`, `cat`, and `zcat` (used by step 2 in a Unix-like shell)
+| Dependency | Version |
+| --- | --- |
+| Python | 3.15.0 |
+| pandas | 3.0.6 |
+| NumPy | 2.5.4 |
+| SciPy | 1.18.1 |
+| Matplotlib | 3.11.2 |
 
-Install Python dependencies with:
+Create and activate a dedicated Conda environment from the repository root:
 
 ```bash
-pip install -r requirements.txt
+conda env create -f environment.yml
+conda activate multipheno-gwas-viz
 ```
+
+Alternatively, with Python 3.15.0 already installed, install the Python dependencies using pip:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Step 2 also requires `awk`, `cat`, and `zcat` on `PATH` in a Unix-like shell environment (for example, linux or WSL on Windows). These system tools are separate from the Python dependencies in `environment.yml` and `requirements.txt`.
 
 ## Pipeline
 
