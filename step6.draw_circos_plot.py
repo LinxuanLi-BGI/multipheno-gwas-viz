@@ -555,7 +555,8 @@ def draw_sector(ax, all_locus_summary, phenotype_summary, category_summary,
         )
     # Category names in the original single-sector layout.
     for cate,values in category_summary.iterrows():
-        y_this = values.bottom+values.N_pheno/2
+        # barh places row centers at integer y; the first row starts at bottom - 0.5.
+        y_this = values.bottom + (values.N_pheno - 1) / 2
         ax_c.text(
             x=-0.5,y=y_this,s=cate,
             color=values.color, font={'weight':'bold'},
