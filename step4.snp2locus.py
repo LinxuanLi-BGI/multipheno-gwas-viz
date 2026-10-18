@@ -162,6 +162,18 @@ def main(args):
     Locus_start = all_sig_locus.groupby(['phenotype','locusID'])['pos'].min().rename('start')
     Locus_end = all_sig_locus.groupby(['phenotype','locusID'])['pos'].max().rename('end')
 
+    # Flag mega-loci using their observed span, independently of the locus window.
+    Locus_span = Locus_end - Locus_start
+    for (phenotype, locusID), span in Locus_span[Locus_span > 500_000].items():
+        locus_key = (phenotype, locusID)
+        print(
+            f"Warning: mega-locus detected: phenotype={phenotype}, locusID={locusID}, "
+            f"chr{Locus_chrom.loc[locus_key]}:{Locus_start.loc[locus_key]}-{Locus_end.loc[locus_key]}, "
+            f"span={span:,} bp (>500 kb). Consider progressively smaller locus windows "
+            "(e.g., 200 kb, then 100 kb) and check whether locus assignments change.",
+            file=sys.stderr,
+        )
+
     # locus mapped gene: GeneA[4], GeneB[6] 
     Locus_N = all_sig_locus.groupby(['phenotype','locusID'])['pos'].count().rename('NSNP')
     locus_gene_snp_count:pd.DataFrame = all_sig_locus.groupby(['phenotype','locusID'])['gene'].value_counts().rename('count').reset_index()
