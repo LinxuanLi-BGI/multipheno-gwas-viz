@@ -3,6 +3,7 @@
 
 import os
 import sys
+import argparse
 
 import pandas as pd
 import numpy as np
@@ -47,10 +48,6 @@ def reformat_chrom(chr_col:pd.Series)->pd.Series:
             return -1
     return np.frompyfunc(reformat,1,1)(chr_col).astype(int)
 
-known_gene_path = sys.argv[2]
-known_gene:pd.DataFrame = pd.read_csv(known_gene_path, sep='\t')
-known_gene['#hg38.knownCanonical.chrom'] = reformat_chrom(known_gene['#hg38.knownCanonical.chrom'])
-
 # get mapped gene from 
 def mapped(chrom:int, pos:int, all_gene=False): 
     Chr_b= known_gene['#hg38.knownCanonical.chrom']==chrom
@@ -70,18 +67,31 @@ def mapped(chrom:int, pos:int, all_gene=False):
         ).abs()
         matched = matched.sort_values('center_distance')
         if all_gene:
-            return '; '.join(matched['hg38.kgXref.geneSymbol'].astype(str))
+            return '; '.join(matched['hg38.kgXref.geneSymbol'].astype(str).drop_duplicates())
         return matched['hg38.kgXref.geneSymbol'].iloc[0]
 
-uf_mapped = np.frompyfunc(mapped, 2, 1)
+uf_mapped = np.frompyfunc(mapped, 3, 1)
 
 def main(args):
+    parser = argparse.ArgumentParser(description='Annotate SNPs with overlapping genes.')
+    parser.add_argument('input_file')
+    parser.add_argument('known_gene_file')
+    parser.add_argument('output_dir')
+    parser.add_argument('--all-gene', action='store_true',
+                        help='Retain all overlapping genes, separated by "; ". '
+                             'By default, select the overlapping gene with the nearest midpoint.')
+    options = parser.parse_args(args[1:])
+
+    global known_gene
+    known_gene = pd.read_csv(options.known_gene_file, sep='\t')
+    known_gene['#hg38.knownCanonical.chrom'] = reformat_chrom(known_gene['#hg38.knownCanonical.chrom'])
+
     ############################################################
     # 1. Load input
     ############################################################
 
-    all_sig_path = args[1] # ./output/step2.all_sig.csv
-    output_path = args[3] # ./output/
+    all_sig_path = options.input_file # ./output/step2.all_sig.csv
+    output_path = options.output_dir # ./output/
 
     all_sig_df = pd.read_csv(all_sig_path, sep='\t') # chrom pos A1 A2 freq size beta se pvalue log10p
 
@@ -98,7 +108,7 @@ def main(args):
         all_sig_df.groupby('id')['phenotype'].unique().map(lambda x:'; '.join(x)).rename('phenotypes')
     ],axis=1)
 
-    all_snp['gene'] = uf_mapped(all_snp['chrom'], all_snp['pos'])
+    all_snp['gene'] = uf_mapped(all_snp['chrom'], all_snp['pos'], options.all_gene)
     all_snp.to_csv(os.path.join(output_path, 'step3.all_unique_snps.csv'), sep='\t', index=False)
 
     ############################################################

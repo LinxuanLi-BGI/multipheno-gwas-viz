@@ -55,8 +55,8 @@ tools/      Standalone utility scripts
 ```bash
 python step1.calculate_independent_phenotype_count.py <phenotype_matrix> <output_dir> <missing_rate> <correlation_method>
 python step2.extract_significant_snp.py <manifest> <output_dir> <summary_config> <pvalue_threshold> <workers>
-python step3.mark_gene.py <input_file> <known_gene_file> <output_dir>
-python step4.snp2locus.py <input_file> <known_gene_file> <locus_window> <output_dir>
+python step3.mark_gene.py <input_file> <known_gene_file> <output_dir> [--all-gene]
+python step4.snp2locus.py <input_file> <known_gene_file> <locus_window> <output_dir> [--no-nearest-gene] [--no-gene-direction]
 python step5.mark_known_GWAS_catalog.py <locus_file> <trait_mapping> <gwas_catalog> <replication_window> <output_dir> [catalog_label_delimiter]
 python step6.draw_circos_plot.py <locus_file> <color_config> <output_dir> <format> [highlight_column] [--sectors {1,2,3,4}]
 python step7.mark_GWAS_catalog_background.py <locus_file> <gwas_catalog> <replication_window> <output_dir>
