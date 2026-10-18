@@ -3,11 +3,13 @@
 
 import os
 import sys
+import argparse
 import json
 import pandas as pd
 import numpy as np
 from pathlib import Path
 from matplotlib import pyplot as plt
+from matplotlib import font_manager
 from matplotlib.colors import to_hex
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
@@ -27,6 +29,8 @@ Chr_sep = 10000000
 Dim = 1.5 * np.pi
 # max gene mark on plot
 N_gene_mark = 30
+# Offset of multi-sector origins as a fraction of the figure width/height.
+Sector_explode = 0.008
 
 Chr_len = {
     1: 248956422,
@@ -56,6 +60,17 @@ Chr_len = {
     25: 16569,
 }
 
+def configure_arial():
+    """Use system Arial, registering the bundled styles only when unavailable."""
+    try:
+        font_manager.findfont('Arial', fallback_to_default=False)
+    except ValueError:
+        for font_path in sorted((Path(__file__).resolve().parent / 'font').glob('arial*.ttf')):
+            font_manager.fontManager.addfont(str(font_path))
+        font_manager.findfont('Arial', fallback_to_default=False)
+    plt.rcParams['font.family'] = 'Arial'
+
+
 def load_config(input_str: str) -> dict:
     # check if input matches builtin config keys
     if input_str in builtin_palettes:
@@ -82,12 +97,6 @@ def load_config(input_str: str) -> dict:
         "Must be a built-in palette key, .json path or .csv path."
     )
 
-def rotate_text(x_loc):
-    if x_loc <= np.pi/Dim :
-        return x_loc
-    else:
-        return x_loc - np.pi/Dim
-
 def strip_arrow(s: str) -> str:
     """
     Remove leading '<-' and trailing '->' from string.
@@ -105,14 +114,22 @@ def main(args):
     # 1. Load input
     ############################################################
 
-    all_locus_path = args[1] # ./output/step5.all_locus_cata.csv
-    palette_path = args[2] # Dark2 
-    output_path = args[3] # ./output/
-    output_format = args[4] # png
-    try:
-        highlight_marker = args[5] # candidate_novel
-    except:
-        highlight_marker = 'NA'
+    parser = argparse.ArgumentParser(description='Draw a multi-phenotype circular Manhattan plot.')
+    parser.add_argument('locus_file')
+    parser.add_argument('color_config')
+    parser.add_argument('output_dir')
+    parser.add_argument('format')
+    parser.add_argument('highlight_column', nargs='?', default='NA')
+    parser.add_argument('--sectors', type=int, choices=range(1, 5), default=1,
+                        help='Number of category-based sectors (1-4; default: 1). '
+                             'Multiple sectors omit the loci-count bar chart.')
+    options = parser.parse_args(args[1:])
+    all_locus_path = options.locus_file
+    palette_path = options.color_config
+    output_path = options.output_dir
+    output_format = options.format
+    highlight_marker = options.highlight_column
+    sector_count = options.sectors
 
     all_locus_summary:pd.DataFrame = pd.read_csv(all_locus_path, sep='\t') # phenotype category chrom top UID
 
@@ -134,6 +151,11 @@ def main(args):
     ############################################################
     # 2. phenotype-level summary
     ############################################################
+
+    if all_locus_summary.empty:
+        parser.error('The locus file contains no rows.')
+    if sector_count > all_locus_summary['category'].nunique():
+        parser.error('--sectors cannot exceed the number of categories.')
 
     all_sig_phenotypes = all_locus_summary['phenotype'].unique()
     phenotype_summary = pd.DataFrame(index=all_sig_phenotypes)
@@ -208,11 +230,83 @@ def main(args):
     # 5. plot coordinate of locus
     ############################################################
 
+    # Keep each category together; place larger categories in the least-loaded
+    # sector first, retaining the existing category/phenotype order within it.
+    sector_sizes = [0] * sector_count
+    category_summary['sector'] = 1
+    if sector_count > 1:
+        for cate in category_summary['N_pheno'].sort_values(ascending=False, kind='stable').index:
+            sector = int(np.argmin(sector_sizes))
+            category_summary.loc[cate, 'sector'] = sector + 1
+            sector_sizes[sector] += int(category_summary.loc[cate, 'N_pheno'])
+        ymax = max(sector_sizes)
+        category_summary['bottom'] = (
+            category_summary.groupby('sector')['N_pheno'].cumsum() - category_summary['N_pheno']
+        )
+
+    configure_arial()
+    fig = plt.figure(figsize=(30,30))
+    fig.set_facecolor('white')
+    plot_bounds = [0.125, 0.11, 0.775, 0.77]
+
+    # Preserve the original 270-degree arc for the default single-sector plot.
+    dim = Dim if sector_count == 1 else 2 * np.pi / sector_count
+    for sector in range(1, sector_count + 1):
+        categories = category_summary[category_summary['sector'] == sector].copy()
+        phenotypes = phenotype_summary[phenotype_summary['category'].isin(categories.index)].copy()
+        phenotypes['y'] = range(len(phenotypes))
+        loci = all_locus_summary[all_locus_summary['category'].isin(categories.index)].copy()
+        theta_start = (sector - 1) * 2 * np.pi / sector_count
+        if sector_count == 1:
+            ax = fig.add_subplot(111, polar=True)
+        else:
+            # Translate each polar origin along the sector bisector, like an
+            # exploded pie. All chromosome arcs retain their full angular span.
+            midpoint = theta_start + dim / 2
+            bounds = plot_bounds.copy()
+            bounds[0] += Sector_explode * np.cos(midpoint)
+            bounds[1] += Sector_explode * np.sin(midpoint)
+            ax = fig.add_axes(bounds, polar=True, frameon=False)
+            ax.set_ylim(-ymax / 4, 1.2 * ymax)
+        ax.set_rorigin(-ymax / 3)
+        ax.axis('off')
+        draw_sector(ax, loci, phenotypes, categories, chr_len, chr_len_pre,
+                    chr_len_total, max_chr, uf_global_pos, highlight_marker,
+                    ymax, theta_start, dim, sector_count)
+
+    if sector_count > 1:
+        fig.legend(
+            handles=[Patch(facecolor=values.color, edgecolor='none', label=str(cate))
+                     for cate, values in category_summary.iterrows()],
+            title='Categories', loc='upper right',
+            bbox_to_anchor=(plot_bounds[0] + plot_bounds[2], fig.axes[0].get_position().y1),
+            frameon=False, fontsize=18,
+            title_fontproperties={'size': 18, 'weight': 'bold'},
+        )
+
+    ############################################################
+    # 7. save
+    ############################################################
+
+    os.makedirs(output_path, exist_ok=True)
+    fig.savefig(os.path.join(output_path, 'step6.circos_plot.'+output_format), dpi=200)
+    plt.close(fig)
+
+    if sector_count == 1:
+        category_summary = category_summary.drop(columns='sector')
+    category_summary.to_csv(os.path.join(output_path, 'step6.category_summary.csv'), sep='\t', index=False)
+
+def draw_sector(ax, all_locus_summary, phenotype_summary, category_summary,
+                chr_len, chr_len_pre, chr_len_total, max_chr, uf_global_pos,
+                highlight_marker, ymax, theta_start, dim, sector_count):
+    """Reuse the original tracks for one category group and one genome arc."""
+    # Fill the same radial range even when sectors have different row counts.
+    yscale = ymax / len(phenotype_summary)
     all_locus_summary['y'] = all_locus_summary['phenotype'].map(phenotype_summary.set_index('phenotype')['y'])
     # global pos
     all_locus_summary['global_pos'] = uf_global_pos(all_locus_summary['chrom'],all_locus_summary['top'])
     # x -> theta
-    all_locus_summary['theta'] = all_locus_summary['global_pos']/chr_len_total*Dim
+    all_locus_summary['theta'] = theta_start + all_locus_summary['global_pos']/chr_len_total*dim
     # color
     all_locus_summary['color'] = all_locus_summary['category'].map(category_summary['color'])
 
@@ -225,12 +319,12 @@ def main(args):
     # gene-pos
     repeated_genes['theta'] = all_locus_summary.dropna(subset='locus_top_gene').groupby('locus_top_gene')['theta'].mean()
     # keep the top N_gene_mark
-    repeated_genes = repeated_genes.iloc[:N_gene_mark].copy()
+    repeated_genes = repeated_genes.iloc[:max(1, N_gene_mark // sector_count)].copy()
     # sort by theta
     repeated_genes = repeated_genes.sort_values('theta')
 
     # Circumferential histogram statistics
-    sections = np.linspace(0,Dim,101)
+    sections = np.linspace(theta_start,theta_start + dim,101)
     bins_count_stats = None
     for i,c in enumerate(all_locus_summary['category'].unique()):
         category_this = all_locus_summary[all_locus_summary['category'] == c]
@@ -250,56 +344,50 @@ def main(args):
     # 6. draw plot
     ############################################################
 
-    fig = plt.figure(figsize=(30,30))
-    fig.set_facecolor('white')
-
-    ax=plt.subplot(111, polar=True)
-    ax.set_rorigin(-ymax / 3)
-    ax.axis('off')
-
     yend = ymax
         
     #bar：endpoint
 
     for i in range(1, max_chr+1): 
         x_loc = (chr_len_pre[i-1] + chr_len[i]/2)/chr_len_total
-        chrom_label_rotate = rotate_text(x_loc)
+        chrom_theta = theta_start + x_loc * dim
+        chrom_label_rotate = chrom_theta if chrom_theta <= np.pi else chrom_theta - np.pi
 
         # box of chrom; layer5
-        ax.bar(x=x_loc * Dim,
+        ax.bar(x=chrom_theta,
             height= yend * 0.05,
-            width= chr_len[i]/chr_len_total*Dim,
+            width= chr_len[i]/chr_len_total*dim,
             bottom = yend*1.025, ec='grey',color='white',lw=3,
             alpha=1,zorder=5) # 10 + 0.2
         # name of chrom; layer6
         chrom = str(i) if i <=22 else "X" if i==23 else "Y" if i==24 else "M" if i==25 else ""
-        ax.text(x=(chr_len_pre[i-1]+chr_len[i]/2)/chr_len_total*Dim,
+        ax.text(x=chrom_theta,
                 y=yend*1.05,
                 s=chrom,
-                fontsize=18, rotation=chrom_label_rotate*Dim/(2*np.pi)*360-90,
+                fontsize=18, rotation=np.degrees(chrom_label_rotate)-90,
                 horizontalalignment='center',verticalalignment='center',zorder=6)
         # background of category; layer1
 
         for cate,values in category_summary.iterrows():
-            ax.bar(x=x_loc*Dim,
-                height = values.N_pheno,
-                width = chr_len[i]/chr_len_total*Dim,
-                bottom = values.bottom,
+            ax.bar(x=chrom_theta,
+                height = values.N_pheno * yscale,
+                width = chr_len[i]/chr_len_total*dim,
+                bottom = values.bottom * yscale,
                 color=(values['color']),
                 alpha=0.2,
                 zorder=1
                 )
         # Histogram background
-        ax.bar(x=x_loc * Dim,
+        ax.bar(x=chrom_theta,
                 height = yend/4,
-                width = chr_len[i]/chr_len_total*Dim,
+                width = chr_len[i]/chr_len_total*dim,
                 bottom = -yend /4,
                 color=(0.92,0.92,0.92,1),
                 zorder=1
                 )
     # x grid; layer2
     for i in phenotype_summary['y']:
-        ax.plot(np.linspace(0,Dim,360), i*np.ones(360), lw=1, color='w', zorder=2)
+        ax.plot(np.linspace(theta_start,theta_start + dim,360), i*yscale*np.ones(360), lw=1, color='w', zorder=2)
 
     bin_ymax = bins_max*1.2
     for i in range(1,100,1):
@@ -310,19 +398,19 @@ def main(args):
     # Histogram grid.
     for d,i in enumerate(ticks):
         if i == 0:
-            ax.plot(np.linspace(0,Dim,360),i*yzoom*np.ones(360), lw=3, color='w', zorder=4)
+            ax.plot(np.linspace(theta_start,theta_start + dim,360),i*yzoom*np.ones(360), lw=3, color='w', zorder=4)
         else:
-            ax.plot(np.linspace(0,Dim,360),i*yzoom*np.ones(360), lw=1, color='w', zorder=2)
+            ax.plot(np.linspace(theta_start,theta_start + dim,360),i*yzoom*np.ones(360), lw=1, color='w', zorder=2)
         
         ax.text(
-            x=Dim, y=i*yzoom,
+            x=theta_start + dim, y=i*yzoom,
             s=i, fontsize=16, zorder=2,
             horizontalalignment='left',verticalalignment='center'
         )
     # layer:4
     # Scale marker size with the radial range: larger markers for compact plots
     # and smaller markers for plots with a larger y range.
-    marker_size = 100 - (np.clip(ymax, 30, 100) - 30) * 75 / 70
+    marker_size = 100 - (np.clip(len(phenotype_summary), 30, 100) - 30) * 75 / 70
     marker_lw = np.sqrt(marker_size) / 10
     highlight_size = marker_size * 2
     highlight_lw = marker_lw * 2
@@ -330,7 +418,7 @@ def main(args):
     if highlight_marker == 'NA':
         ax.scatter(
             x=all_locus_summary.theta,
-            y=(all_locus_summary.y+0.5),
+            y=(all_locus_summary.y+0.5)*yscale,
             s=marker_size,
             color=all_locus_summary.color,
             marker='o',
@@ -345,7 +433,7 @@ def main(args):
         # known
         ax.scatter(
             x=all_locus_false.theta,
-            y=(all_locus_false.y+0.5),
+            y=(all_locus_false.y+0.5)*yscale,
             s=marker_size,
             color=all_locus_false.color,
             marker='o',
@@ -358,7 +446,7 @@ def main(args):
         for key,values in all_locus_true.iterrows():
             ax.scatter(
                 x=values.theta,
-                y=(values.y+0.5),
+                y=(values.y+0.5)*yscale,
                 s=highlight_size,
                 color=values.color,
                 marker=(4,0,values.theta/(2*np.pi)*360),
@@ -368,32 +456,35 @@ def main(args):
                 alpha=1
             )
         # legend
-        ax.legend(
-            handles=[
-                Line2D([], [], marker='o', linestyle='None', markersize = 10,
-                       markerfacecolor='grey', markeredgecolor='k', linewidth = 1,
-                       label='False'),
-                Line2D([], [], marker=(4, 0, 0), linestyle='None', markersize = 12 ,
-                       markerfacecolor='grey', markeredgecolor='k', linewidth = 2,
-                       label='True'),
-            ],
-            loc='upper left',
-            frameon=False,
-            title=highlight_marker,
-            title_fontproperties={'size': 18, 'weight': 'bold'},
-            fontsize=18,
-        )
+        if theta_start == 0:
+            ax.legend(
+                handles=[
+                    Line2D([], [], marker='o', linestyle='None', markersize = 10,
+                           markerfacecolor='grey', markeredgecolor='k', linewidth = 1,
+                           label='False'),
+                    Line2D([], [], marker=(4, 0, 0), linestyle='None', markersize = 12 ,
+                           markerfacecolor='grey', markeredgecolor='k', linewidth = 2,
+                           label='True'),
+                ],
+                loc='upper left',
+                frameon=False,
+                title=highlight_marker,
+                title_fontproperties={'size': 18, 'weight': 'bold'},
+                fontsize=18,
+            )
     # mark gene; use radial proportions so annotations remain aligned when
     # the number of phenotypes (and therefore yend) changes.
 
     word_wide = 0.0138 * yend
-    last_theta = -1
+    last_theta = theta_start - 1
     for key,values in repeated_genes.iterrows():
         # theta project distance 0.02
         if values.theta - last_theta > 0.02:
             this_theta = values.theta
         else:
             this_theta = last_theta + 0.02
+        if sector_count > 1 and this_theta >= theta_start + dim:
+            break
         # line layer:3
         ax.plot(
             [values.theta, values.theta, this_theta, this_theta],
@@ -417,7 +508,7 @@ def main(args):
     # draw center hist
 
     for i,c in enumerate(all_locus_summary['category'].unique()):
-        x_width = Dim/100
+        x_width = dim/100
         x_pos = sections[:-1] + x_width/2
         y_bottom = yzoom * bins_count_stats.cumsum(axis=1).iloc[:,i]
         y_height = yzoom * bins_count_stats.loc[:,c]
@@ -425,6 +516,9 @@ def main(args):
         ax.bar(x=x_pos,width=x_width,bottom=y_bottom,height=y_height,color=c_bar,zorder=3)
 
     
+    if sector_count > 1:
+        return
+
     # Radial histogram
     ax_c = ax.inset_axes([0.61,0.060,0.35,0.333])
     ax_c.axis('off')
@@ -459,7 +553,7 @@ def main(args):
             title_fontproperties={'size': 18, 'weight': 'bold'},
             fontsize=18,
         )
-    # Category names
+    # Category names in the original single-sector layout.
     for cate,values in category_summary.iterrows():
         y_this = values.bottom+values.N_pheno/2
         ax_c.text(
@@ -481,13 +575,6 @@ def main(args):
     ax_c.text(x=bin_xmax/2,y=yend*1.05,s='Number of identified loci', fontsize=18,horizontalalignment='center',verticalalignment='top')
     ax_c.set_ylim(1.02*yend, -1)
 
-    ############################################################
-    # 7. save
-    ############################################################
-
-    fig.savefig(os.path.join(output_path, 'step6.circos_plot.'+output_format), dpi=200)
-
-    category_summary.to_csv(os.path.join(output_path, 'step6.category_summary.csv'), sep='\t', index=False)
 
 if __name__ == "__main__":
     main(sys.argv)

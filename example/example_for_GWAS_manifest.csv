@@ -1,2 +1,6 @@
 phenotype_name	phenotype_category	summary_statistics_path
-P_LCR	Default	./example/GWAS_quantitative_20.P_LCR.glm.linear.add.gz
+P_LCR	Hematological	./example/example_for_GWAS_summary/GWAS_quantitative_20.P_LCR.glm.linear.add.gz
+TBIL	Liver-related	./example/example_for_GWAS_summary/GWAS_TBIL.TBIL.glm.linear.add.gz
+TSH	Hormone	./example/example_for_GWAS_summary/GWAS_TSH.TSH.glm.linear.add.gz
+UA	Kidney-related	./example/example_for_GWAS_summary/GWAS_UA.UA.glm.linear.add.gz
+WBC	Hematological	./example/example_for_GWAS_summary/GWAS_WBC.WBC.glm.linear.add.gz
