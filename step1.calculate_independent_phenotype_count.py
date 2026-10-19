@@ -426,7 +426,6 @@ def main(args):
         data=phenotype_matrix,
         cor_method=correlation_method,
         missing_threshold=missing_rate_threshold,
-        alpha=0.05,
     )
     
     print("Results:")
