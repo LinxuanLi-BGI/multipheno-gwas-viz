@@ -239,7 +239,8 @@ def main(args):
     ############################################################
 
     # Number of distinct OTHER phenotypes represented in Recurrence.
-    all_locus_summary['N_recurrence_phenotypes'] = 0
+    all_locus_summary['Recurrence'] = ''
+    all_locus_summary['N_recurr'] = 0
     for i, locus in all_locus_summary.iterrows():
         chrom = locus.chrom
         start = locus.start - locus_window
@@ -248,7 +249,7 @@ def main(args):
 
         all_recurrence_in_window:pd.DataFrame = all_locus_summary.query('chrom == @chrom and top >= @start and top <= @end and phenotype != @phenotype')
         all_locus_summary.loc[i, 'Recurrence'] = ', '.join(all_recurrence_in_window.sort_values('log10p', ascending=False)['UID'])
-        all_locus_summary.loc[i, 'N_recurrence_phenotypes'] = all_recurrence_in_window['phenotype'].nunique()
+        all_locus_summary.loc[i, 'N_recurr'] = all_recurrence_in_window['phenotype'].nunique()
 
     all_locus_summary.to_csv(os.path.join(output_path, 'step4.all_locus.csv'), sep='\t', index=False)
 

@@ -119,7 +119,7 @@ def main(args):
     parser.add_argument('color_config')
     parser.add_argument('output_dir')
     parser.add_argument('format')
-    parser.add_argument('highlight_column', nargs='?', default='NA')
+    parser.add_argument('highlight_column', nargs='?', default='candidate_novel')
     parser.add_argument('--sectors', type=int, choices=range(1, 5), default=1,
                         help='Number of category-based sectors (1-4; default: 1). '
                              'Multiple sectors omit the loci-count bar chart.')
