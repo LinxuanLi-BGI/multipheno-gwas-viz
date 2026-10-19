@@ -199,21 +199,18 @@ def main(args):
     # lead SNP
     Locus_topP = all_sig_locus.groupby(['phenotype','locusID'])['pvalue'].min()
     locus_top_logP = all_sig_locus.groupby(['phenotype','locusID'])['log10p'].max()
-    Locus_toppos = pd.Series(
-        data = all_sig_locus.loc[all_sig_locus.groupby(['phenotype','locusID'])['log10p'].idxmax().values,'pos'].values,
-        index= Locus_N.index,
-        name = 'top'
-    )
-    Locus_beta = pd.Series(
-        data = all_sig_locus.loc[all_sig_locus.groupby(['phenotype','locusID'])['log10p'].idxmax().values, 'beta'].values,
-        index= Locus_topP.index,
-        name = 'beta'
-    )
-    Locus_A1 = pd.Series(
-        data = all_sig_locus.loc[all_sig_locus.groupby(['phenotype','locusID'])['log10p'].idxmax().values, 'A1'].values,
-        index= Locus_topP.index,
-        name = 'A1'
-    )
+    # Select once so position, alleles, effect and SE come from the same row.
+    # idxmax retains the first row when -log10(P) values are tied.
+    lead_snps = all_sig_locus.loc[
+        all_sig_locus.groupby(['phenotype','locusID'])['log10p'].idxmax()
+    ].set_index(['phenotype', 'locusID'])
+    Locus_toppos = lead_snps['pos'].rename('top')
+    Locus_beta = lead_snps['beta']
+    Locus_A1 = lead_snps['A1']
+    # A2 and se are optional: omit columns that are absent upstream.
+    optional_lead_fields = [
+        lead_snps[column] for column in ('A2', 'se') if column in lead_snps.columns
+    ]
     # concat
 
     all_locus_summary:pd.DataFrame = pd.concat([
@@ -228,7 +225,8 @@ def main(args):
         locus_top_logP,
         Locus_toppos,
         Locus_beta,
-        Locus_A1
+        Locus_A1,
+        *optional_lead_fields
     ] ,axis=1).reset_index()
 
     all_locus_summary['top_snp_nearest_gene'] = uf_closed(
@@ -240,14 +238,17 @@ def main(args):
     # 4. cross-phenotype recurrence
     ############################################################
 
+    # Number of distinct OTHER phenotypes represented in Recurrence.
+    all_locus_summary['N_recurrence_phenotypes'] = 0
     for i, locus in all_locus_summary.iterrows():
         chrom = locus.chrom
         start = locus.start - locus_window
         end = locus.end + locus_window
-        UID = locus.UID
+        phenotype = locus.phenotype
 
-        all_recurrence_in_window:pd.DataFrame = all_locus_summary.query('chrom == @chrom and top >= @start and top <= @end and UID != @UID')
+        all_recurrence_in_window:pd.DataFrame = all_locus_summary.query('chrom == @chrom and top >= @start and top <= @end and phenotype != @phenotype')
         all_locus_summary.loc[i, 'Recurrence'] = ', '.join(all_recurrence_in_window.sort_values('log10p', ascending=False)['UID'])
+        all_locus_summary.loc[i, 'N_recurrence_phenotypes'] = all_recurrence_in_window['phenotype'].nunique()
 
     all_locus_summary.to_csv(os.path.join(output_path, 'step4.all_locus.csv'), sep='\t', index=False)
 

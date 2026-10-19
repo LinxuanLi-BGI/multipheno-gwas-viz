@@ -4,6 +4,7 @@
 import os
 import sys
 import json
+import gzip
 import pandas as pd
 import numpy as np
 import subprocess
@@ -152,6 +153,36 @@ def reformat_chrom(x:str)->int:
     except ValueError:
         return -1
 
+def validate_required_columns(columns, config, context):
+    """Require configured coordinates and at least one significance column."""
+    missing = [
+        f'{field} (configured column: {config.get(field)!r})'
+        for field in ('chrom', 'pos')
+        if not config.get(field) or config[field] not in columns
+    ]
+    if not any(config.get(field) and config[field] in columns
+               for field in ('pvalue', 'log10p')):
+        missing.append(
+            'pvalue or log10p '
+            f'(configured columns: {config.get("pvalue")!r}, {config.get("log10p")!r})'
+        )
+    if missing:
+        raise ValueError(f'{context}: missing required fields: {"; ".join(missing)}. '
+                         'Check the summary header and column mapping.')
+
+
+def warn_missing_configured_columns(columns, config, context):
+    """Report missing source columns once, during input-header inspection."""
+    missing = [
+        f'{field} -> {source_name!r}'
+        for field, source_name in config.items()
+        if field != 'keep' and source_name and source_name not in columns
+    ]
+    if missing:
+        print(f'[Warning]: {context}: configured columns missing from input: '
+              f'{"; ".join(missing)}.', file=sys.stderr)
+
+
 def main(args):
 
     ############################################################
@@ -171,14 +202,25 @@ def main(args):
     # GWAS_manifest col: phenotype_name, phenotype_category, summary_statistics_path
     GWAS_manifest = pd.read_csv(GWAS_manifest_file, sep='\t')
 
-    # Path to store significant SNPs extracted from each phenotype
-    try:
-        os.makedirs(os.path.join(output_path, 'sig'), exist_ok=True)
-    except Exception as E:
-        print(E)
-
     # summary_config
     summary_config = load_config(summary_config_key)
+
+    # Validate every input before extracting any phenotype or creating outputs.
+    for _, row in GWAS_manifest.iterrows():
+        input_path = str(row['summary_statistics_path'])
+        context = f'phenotype={row["phenotype_name"]!r}, file={input_path!r}'
+        opener = gzip.open if input_path.lower().endswith(('.gz', '.gzip')) else open
+        try:
+            with opener(input_path, 'rt', encoding='utf-8-sig') as handle:
+                columns = handle.readline().strip().split()
+            validate_required_columns(columns, summary_config, context)
+            warn_missing_configured_columns(columns, summary_config, context)
+        except (OSError, UnicodeError, ValueError) as error:
+            print(f'Error: {context}: {error}', file=sys.stderr)
+            return 1
+
+    # Path to store significant SNPs extracted from each phenotype
+    os.makedirs(os.path.join(output_path, 'sig'), exist_ok=True)
 
     # Significance threshold
     log_t = -np.log10(significance_threshold)
@@ -260,6 +302,7 @@ def main(args):
             continue
 
         sig_df = pd.read_csv(sig_file, sep='\t')
+        validate_required_columns(sig_df.columns, summary_config, str(sig_file))
         formatted = pd.DataFrame(index=sig_df.index)
 
         # Map source summary-statistics columns to the standard output names.
@@ -278,7 +321,6 @@ def main(args):
             odds_ratio = pd.to_numeric(sig_df[or_name], errors='coerce')
             beta = np.log(odds_ratio)
         else:
-            print('[Warning]: No beta in summary!')
             beta = pd.Series(np.nan, index=sig_df.index)
         formatted['beta'] = beta
 
@@ -289,16 +331,14 @@ def main(args):
         # Always output both forms. A zero p-value is represented as 308.
         if log_name in sig_df.columns:
             log10p = pd.to_numeric(sig_df[log_name], errors='coerce')
-            pvalue:pd.Series = np.power(10,-log10p)
+            pvalue:pd.Series = np.power(10.0,-log10p)
             pvalue = pvalue.mask(log10p > 308, 0)
         elif p_name in sig_df.columns:
             pvalue = pd.to_numeric(sig_df[p_name], errors='coerce')
             log10p:pd.Series = -np.log10(pvalue.where(pvalue > 0))
             log10p = log10p.mask(pvalue.eq(0), 308)
         else:
-            print('[Warning]: No pvalue in summary!')
-            pvalue = pd.Series(np.nan, index=sig_df.index)
-            log10p = pd.Series(np.nan, index=sig_df.index)
+            raise ValueError(f'{sig_file}: missing configured pvalue/log10p columns.')
         formatted['pvalue'] = pvalue
         formatted['log10p'] = log10p
 
@@ -320,4 +360,4 @@ def main(args):
         print('No significant SNP extracted.')
 
 if __name__ == "__main__":
-    main(sys.argv)
+    sys.exit(main(sys.argv))
