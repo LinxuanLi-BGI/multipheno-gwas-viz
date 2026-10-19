@@ -6,6 +6,121 @@ import os
 import sys
 from scipy.stats import rankdata
 
+
+def warn_phenotype_matrix(data, missing_threshold=0.20, input_path=None):
+    """Report input concerns before calculation without changing data or QC.
+
+    Rows should be unique participants and columns should be phenotypes.
+    Complete, unique columns with no float-like values are possible IDs.
+    This heuristic only warns; the original numeric selection and QC decide
+    what enters the calculation. The input DataFrame is never modified.
+    """
+    def warn(message):
+        print(f"[Warning] {message}", file=sys.stderr)
+
+    # Read the original header because pandas renames duplicate/empty names.
+    header = list(data.columns)
+    if input_path is not None:
+        header = pd.read_csv(
+            input_path, sep="\t", header=None, nrows=1,
+            dtype=str, keep_default_na=False,
+        ).iloc[0].tolist()
+    names = pd.Index([str(name).strip() for name in header])
+    duplicates = names[names.duplicated()].unique().tolist()
+    if duplicates:
+        warn("Duplicate column names: " + ", ".join(repr(c) for c in duplicates)
+             + ". Check the input header.")
+    if any(not name for name in names):
+        warn("Empty column names detected. Check the input header.")
+    if data.shape[1] < 2:
+        warn("Expected a tab-delimited matrix with at least two phenotype columns.")
+    if not isinstance(data.index, pd.RangeIndex):
+        warn("Unexpected row index; check tab delimiters and field counts.")
+    if len(data) < 3:
+        warn("Fewer than 3 participant rows; check matrix orientation and sample size.")
+    if not np.isfinite(missing_threshold) or not 0 <= missing_threshold <= 1:
+        warn("Missing-rate threshold is outside [0, 1]. Check the argument.")
+
+    suspected_ids, nonnumeric, missing_text = [], [], []
+    infinite, excluded, imputed, rare_binary = [], [], [], []
+    numeric_count = 0
+    retained_count = 0
+    for column in data.columns:
+        series = data[column]
+        text = series.astype("string").str.strip()
+        numeric = pd.to_numeric(text, errors="coerce")
+        float_like = numeric.notna() & ~text.str.fullmatch(r"[+-]?\d+", na=False)
+        if len(series) and series.notna().all() and series.is_unique and not float_like.any():
+            suspected_ids.append(str(column))
+        if not pd.api.types.is_numeric_dtype(series):
+            nonnumeric.append(str(column))
+            tokens = {"", "NA", "N/A", "NAN", "NULL", "NONE", "<NA>"}
+            if (series.notna() & text.str.upper().isin(tokens)).any():
+                missing_text.append(str(column))
+            continue
+
+        numeric_count += 1
+        values = series.to_numpy(dtype=float)
+        observed = values[~np.isnan(values)]
+        n_observed = len(observed)
+        missing_rate = float(np.isnan(values).mean()) if len(values) else np.nan
+        with np.errstate(over="ignore", invalid="ignore", under="ignore"):
+            sd = float(np.std(observed, ddof=1)) if n_observed >= 2 else np.nan
+        reasons = []
+        if np.isinf(values).any():
+            infinite.append(str(column))
+        if missing_rate > missing_threshold:
+            reasons.append("high missing rate")
+        if n_observed < 3:
+            reasons.append("<3 observations")
+        if n_observed and np.unique(observed).size == 1:
+            reasons.append("constant")
+        if n_observed >= 3 and not np.isfinite(sd):
+            reasons.append("nonfinite SD")
+        elif n_observed >= 3 and sd == 0 and "constant" not in reasons:
+            reasons.append("zero SD")
+        # Mirror the existing QC criteria for reporting only.
+        retained = (
+            missing_rate <= missing_threshold and n_observed >= 3
+            and np.isfinite(sd) and sd > 0
+        )
+        if retained:
+            retained_count += 1
+            if np.isnan(values).any():
+                imputed.append(str(column))
+        elif reasons:
+            excluded.append(f"{column} ({'; '.join(reasons)})")
+        if np.array_equal(np.unique(observed), [0, 1]):
+            cases = int(np.count_nonzero(observed == 1))
+            if cases < 10:
+                rare_binary.append(f"{column} ({cases})")
+
+    if suspected_ids:
+        warn("Possible ID columns (unique, non-float values): "
+             + ", ".join(suspected_ids) + ". Remove IDs before analysis.")
+    if nonnumeric:
+        warn("Nonnumeric columns will be ignored: " + ", ".join(nonnumeric) + ".")
+    if missing_text:
+        warn("Unrecognized missing-value text: " + ", ".join(missing_text)
+             + ". Normalize to NA or empty cells.")
+    if infinite:
+        warn("Infinite values detected: " + ", ".join(infinite) + ". Check input values.")
+    if excluded:
+        warn("QC will exclude: " + ", ".join(excluded) + ".")
+    if imputed:
+        warn("Missing values will be median-imputed: " + ", ".join(imputed) + ".")
+    if rare_binary:
+        warn("0/1 columns with <10 cases (1=case): "
+             + ", ".join(rare_binary) + ". Review before analysis.")
+    duplicate_rows = int(data.duplicated().sum())
+    if duplicate_rows:
+        warn(f"Repeated rows: {duplicate_rows}; confirm participant uniqueness.")
+    if numeric_count < 2:
+        warn("Fewer than 2 numeric phenotype columns are available.")
+    elif retained_count < 2:
+        warn("Fewer than 2 phenotypes will remain after QC.")
+
+
 def calculate_effective_markers(
     data,
     marker_cols=None,
@@ -297,6 +412,10 @@ def main(args):
     correlation_method = args[4] # spearman
 
     phenotype_matrix = pd.read_csv(phenotype_matrix_path, sep='\t')
+    warn_phenotype_matrix(
+        phenotype_matrix, missing_threshold=missing_rate_threshold,
+        input_path=phenotype_matrix_path,
+    )
 
     ############################################################
     # 2. Calculation
