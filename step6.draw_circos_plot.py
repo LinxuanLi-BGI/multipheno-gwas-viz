@@ -251,6 +251,9 @@ def main(args):
 
     # Preserve the original 270-degree arc for the default single-sector plot.
     dim = Dim if sector_count == 1 else 2 * np.pi / sector_count
+    has_missing_highlight = (
+        highlight_marker != 'NA' and all_locus_summary[highlight_marker].isna().any()
+    )
     for sector in range(1, sector_count + 1):
         categories = category_summary[category_summary['sector'] == sector].copy()
         phenotypes = phenotype_summary[phenotype_summary['category'].isin(categories.index)].copy()
@@ -272,7 +275,7 @@ def main(args):
         ax.axis('off')
         draw_sector(ax, loci, phenotypes, categories, chr_len, chr_len_pre,
                     chr_len_total, max_chr, uf_global_pos, highlight_marker,
-                    ymax, theta_start, dim, sector_count)
+                    ymax, theta_start, dim, sector_count, has_missing_highlight)
 
     if sector_count > 1:
         fig.legend(
@@ -298,7 +301,8 @@ def main(args):
 
 def draw_sector(ax, all_locus_summary, phenotype_summary, category_summary,
                 chr_len, chr_len_pre, chr_len_total, max_chr, uf_global_pos,
-                highlight_marker, ymax, theta_start, dim, sector_count):
+                highlight_marker, ymax, theta_start, dim, sector_count,
+                has_missing_highlight=False):
     """Reuse the original tracks for one category group and one genome arc."""
     # Fill the same radial range even when sectors have different row counts.
     yscale = ymax / len(phenotype_summary)
@@ -430,6 +434,7 @@ def draw_sector(ax, all_locus_summary, phenotype_summary, category_summary,
     else:
         all_locus_false = all_locus_summary[all_locus_summary[highlight_marker] == False]
         all_locus_true  = all_locus_summary[all_locus_summary[highlight_marker] == True]
+        all_locus_missing = all_locus_summary[all_locus_summary[highlight_marker].isna()]
         # known
         ax.scatter(
             x=all_locus_false.theta,
@@ -442,6 +447,19 @@ def draw_sector(ax, all_locus_summary, phenotype_summary, category_summary,
             zorder=4,
             alpha=0.7,
         )
+        # Unassessed loci remain visible without being labeled as known or novel.
+        if not all_locus_missing.empty:
+            ax.scatter(
+                x=all_locus_missing.theta,
+                y=(all_locus_missing.y+0.5)*yscale,
+                s=marker_size,
+                facecolors='none',
+                edgecolors=all_locus_missing.color,
+                marker='o',
+                lw=marker_lw,
+                zorder=4,
+                alpha=0.7,
+            )
         # novel
         for key,values in all_locus_true.iterrows():
             ax.scatter(
@@ -457,15 +475,22 @@ def draw_sector(ax, all_locus_summary, phenotype_summary, category_summary,
             )
         # legend
         if theta_start == 0:
+            handles = [
+                Line2D([], [], marker='o', linestyle='None', markersize = 10,
+                       markerfacecolor='grey', markeredgecolor='k', linewidth = 1,
+                       label='False'),
+                Line2D([], [], marker=(4, 0, 0), linestyle='None', markersize = 12 ,
+                       markerfacecolor='grey', markeredgecolor='k', linewidth = 2,
+                       label='True'),
+            ]
+            if has_missing_highlight:
+                handles.append(Line2D(
+                    [], [], marker='o', linestyle='None', markersize=10,
+                    markerfacecolor='none', markeredgecolor='grey',
+                    label='NA (not assessed)',
+                ))
             ax.legend(
-                handles=[
-                    Line2D([], [], marker='o', linestyle='None', markersize = 10,
-                           markerfacecolor='grey', markeredgecolor='k', linewidth = 1,
-                           label='False'),
-                    Line2D([], [], marker=(4, 0, 0), linestyle='None', markersize = 12 ,
-                           markerfacecolor='grey', markeredgecolor='k', linewidth = 2,
-                           label='True'),
-                ],
+                handles=handles,
                 loc='upper left',
                 frameon=False,
                 title=highlight_marker,
@@ -544,7 +569,8 @@ def draw_sector(ax, all_locus_summary, phenotype_summary, category_summary,
         )
         ax_c.legend(
             handles=[
-                Patch(facecolor='grey', edgecolor='none', alpha=0.5, label='False'),
+                Patch(facecolor='grey', edgecolor='none', alpha=0.5,
+                      label='All loci' if has_missing_highlight else 'False'),
                 Patch(facecolor='grey', edgecolor='none', alpha=1, label='True'),
             ],
             loc='upper right',

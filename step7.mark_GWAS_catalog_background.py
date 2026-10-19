@@ -27,6 +27,7 @@ def main(args):
     all_locus_summary = pd.read_csv(all_locus_path, sep='\t') # phenotype chrom start end locusID UID candidate_novel
 
     candidate_locus_summary = all_locus_summary.query("candidate_novel == True").copy()
+    candidate_locus_summary['cata_ALL'] = ''
 
     gwas_catalog = pd.read_csv(gwas_catalog_path, sep='\t', low_memory=False) # P-VALUE CHR_ID CHR_POS DISEASE/TRAIT
     # GWAS catalog also contain variants that did not reach the threshold 5e-8
