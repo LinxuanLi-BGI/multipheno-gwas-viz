@@ -142,6 +142,20 @@ def main(args):
     # focus on the traits provided in trait_2_catalog table
     all_traits = trait_2_catalog.keys()
 
+    unmapped = ~all_locus_summary['phenotype'].isin(all_traits)
+    for trait in all_locus_summary.loc[unmapped, 'phenotype'].unique():
+        print(
+            f'Warning: phenotype={trait!r} is missing from trait_2_catalog '
+            f'{trait_2_catalog_path!r}. Replication counts and candidate_novel '
+            'will be NA. Add a mapping and rerun Step 5 to classify these loci.',
+            file=sys.stderr,
+        )
+
+    # Keep unassessed loci missing, including when no input phenotype is mapped.
+    for column in ('rep_ALL', 'rep_EAS', 'rep_EUR'):
+        all_locus_summary[column] = np.nan
+    all_locus_summary['rep_study'] = ''
+
     # Evidence from the most significant matching Catalog association.
     all_locus_summary['rep_trait'] = ''
     all_locus_summary['rep_variant'] = ''
@@ -177,10 +191,17 @@ def main(args):
     # 3. candidate_novel and save
     ############################################################
 
-    # True: novel; False: known
-    all_locus_summary['candidate_novel'] = (all_locus_summary['rep_ALL'] == 0)
+    # True: candidate novel; False: known; NA: not assessed.
+    all_locus_summary['candidate_novel'] = (
+        all_locus_summary['rep_ALL'].eq(0).astype('boolean')
+        .mask(all_locus_summary['rep_ALL'].isna())
+    )
 
-    all_locus_summary.to_csv(os.path.join(output_path, 'step5.all_locus_cata.csv'), sep='\t', index=False)
+    # Write an explicit NA for unknown classifications; preserve other output formatting.
+    output = all_locus_summary.assign(
+        candidate_novel=all_locus_summary['candidate_novel'].astype('string').fillna('NA')
+    )
+    output.to_csv(os.path.join(output_path, 'step5.all_locus_cata.csv'), sep='\t', index=False)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
