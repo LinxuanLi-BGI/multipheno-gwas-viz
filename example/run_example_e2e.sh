@@ -11,8 +11,9 @@ mkdir -p ./tests/
 export MPLBACKEND=Agg MPLCONFIGDIR="$OUT/.matplotlib" PYTHONDONTWRITEBYTECODE=1
 
 "$PYTHON" step1.calculate_independent_phenotype_count.py example/example_for_Phenotype_matrix.csv "$OUT" 0.2 spearman
-# Demo threshold from the synthetic matrix, using the same Li-Ji method as step 1.
-P_THRESHOLD=$(awk -F '\t' '$1 == "Li-Ji effective markers" {printf "%.17g", 5e-8 / $2}' "$OUT/step1.summary.csv")
+# Fixed threshold for the five-summary GWAS example.
+# The synthetic Step1 phenotype matrix is a separate demonstration.
+P_THRESHOLD=1e-8
 "$PYTHON" step2.extract_significant_snp.py example/example_for_GWAS_manifest.csv "$OUT" example/summary_config.json "$P_THRESHOLD" "${WORKERS:-5}"
 "$PYTHON" step3.mark_gene.py "$OUT/step2.all_sig.csv" "$GENES" "$OUT"
 "$PYTHON" step4.snp2locus.py "$OUT/step3.all_sig_gene.csv" "$GENES" 500000 "$OUT"

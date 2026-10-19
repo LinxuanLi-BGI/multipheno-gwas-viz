@@ -341,7 +341,8 @@ def main(args):
             raise ValueError(f'{sig_file}: missing configured pvalue/log10p columns.')
         formatted['pvalue'] = pvalue
         formatted['log10p'] = log10p
-
+        # Exclude missing P values before merging; retain valid zero P values.
+        formatted = formatted.dropna(subset=['pvalue'])
 
         # format chrom code to int type
         if 'chrom' in formatted.columns:

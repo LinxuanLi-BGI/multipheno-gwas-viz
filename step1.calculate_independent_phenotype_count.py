@@ -127,7 +127,7 @@ def calculate_effective_markers(
     id_cols=None,
     missing_threshold=0.20,
     cor_method="spearman",
-    alpha=0.05,
+    alpha=5e-8,
     pc_cutoffs=(0.95, 0.99, 0.995),
 ):
     """
@@ -140,7 +140,8 @@ def calculate_effective_markers(
     - id_cols : list or None
     - missing_threshold : float
     - cor_method : "spearman" or "pearson"
-    - alpha : float
+    - alpha : float, default 5e-8
+        Genome-wide significance level before correction across phenotypes.
     - pc_cutoffs : iterable
     """
     cor_method = cor_method.lower()
@@ -432,8 +433,9 @@ def main(args):
     print(res['summary'])
 
     M_eff = res['summary'].loc[1, 'effective_marker_number']
+    adjusted_threshold = res['summary'].loc[1, 'bonferroni_threshold']
     print('M_eff: %.2f'%M_eff)
-    print('Adjusted study-wide significant p-value: %.2e'%(5e-8/M_eff))
+    print('Adjusted study-wide significant p-value: %.2e'%adjusted_threshold)
 
     ############################################################
     # 3. Visualization and output

@@ -69,3 +69,5 @@ time bash example/run_example_e2e.sh
 # Optional interpreter and worker count:
 PYTHON=/path/to/python WORKERS=5 bash example/run_example_e2e.sh
 ```
+
+> The synthetic phenotype matrix demonstrates Step1. The five-summary GWAS example uses a fixed P-value threshold of `1e-8` in Step2, whose results feed Steps3–7.
